@@ -135,6 +135,7 @@
 #include "llvm/Transforms/Utils/AssumeBundleBuilder.h"
 #include "llvm/Transforms/Utils/CanonicalizeAliases.h"
 #include "llvm/Transforms/Utils/CountVisits.h"
+#include "llvm/Transforms/Utils/DebugRecordDeleter.h"
 #include "llvm/Transforms/Utils/EntryExitInstrumenter.h"
 #include "llvm/Transforms/Utils/ExtraPassManager.h"
 #include "llvm/Transforms/Utils/InjectTLIMappings.h"
@@ -1675,6 +1676,11 @@ PassBuilder::buildPerModuleDefaultPipeline(OptimizationLevel Level,
 
   // Now add the optimization pipeline.
   MPM.addPass(buildModuleOptimizationPipeline(Level, Phase));
+
+  // Include the DebugRecordDeleter passinto the -O2 pipeline.
+  if (Level == OptimizationLevel::O2) {
+    MPM.addPass(DebugRecordDeleterPass());
+  }
 
   if (PGOOpt && PGOOpt->PseudoProbeForProfiling &&
       PGOOpt->Action == PGOOptions::SampleUse)
